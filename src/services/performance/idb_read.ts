@@ -4,6 +4,37 @@ import {PerformanceTestCase} from 'services/performance/performance';
 
 const CONTEXT = 'idb_read';
 
+function prepDifferentStrings(iteration: number, strLen : number) {
+  return new Promise<void>((resolve, reject) => {
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+    request.onerror = () => {
+      handleError(request.error!, CONTEXT, reject);
+    };
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      db.createObjectStore('entries', {
+        keyPath: 'key',
+      });
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction('entries', 'readwrite');
+      const store = transaction.objectStore('entries');
+      for (let i = 0; i < iteration; ++i) {
+        store.add({key: `doc_${i}`, value: generateString(strLen)});
+      }
+      transaction.onerror = () => {
+        handleError(transaction.error!, CONTEXT, reject);
+      };
+      transaction.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+    };
+  });
+}
+
 function prep(iteration: number, blob: string|object) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
@@ -122,7 +153,7 @@ function benchmarkReadGetAll() {
   });
 }
 
-function benchmarkReadParallelGet() {
+function benchmarkReadParallelGet(fetchCount : number) {
   return new Promise<number>((resolve, reject) => {
     const results: Record<string, {}> = {};
     const request = indexedDB.open('idb-playground-benchmark', 1);
@@ -133,8 +164,8 @@ function benchmarkReadParallelGet() {
       const start = performance.now();
       const transaction = db.transaction('entries', 'readonly');
       const store = transaction.objectStore('entries');
-      for (let key of keys) {
-        const getRequest = store.get(key);
+      for (let i = 0; i < fetchCount; ++i) {
+        const getRequest = store.get(keys[Math.floor(Math.random() * i)]);
         getRequest.onsuccess = () => {
           const item = getRequest.result;
           results[item.key] = item.blob;
@@ -179,13 +210,6 @@ function benchmarkReadSerialGet() {
       const store = transaction.objectStore('entries');
       readItem(store, results, keys, 0);
 
-      for (let key of keys) {
-        const getRequest = store.get(key);
-        getRequest.onsuccess = () => {
-          const item = getRequest.result;
-          results[item.key] = item.blob;
-        };
-      }
       transaction.onerror = () => {
         handleError(transaction.error!, CONTEXT, reject);
       };
@@ -193,7 +217,10 @@ function benchmarkReadSerialGet() {
         const end = performance.now();
         db.close();
         resolve(end - start);
-      }
+      };
+    };
+    request.onerror = () => {
+      handleError(request.error!, CONTEXT, reject);
     };
   });
 }
@@ -281,16 +308,24 @@ const read100x1KBParallelGet: PerformanceTestCase = {
   ...baseCase,
   name: 'idbRead100x1KBParallelGet',
   label: 'idb read 100x1KB by sending get requests in parallel',
-  prep: () => prep(100, generateString(1)),
-  benchmark: () => benchmarkReadParallelGet(),
+  prep: () => prepDifferentStrings(500000, 1),
+  benchmark: () => benchmarkReadParallelGet(100),
 }
 
 const read100x1KBSerialGet: PerformanceTestCase = {
   ...baseCase,
   name: 'idbRead100x1KBSerialGet',
   label: 'idb read 100x1KB by sending get requests one by one',
-  prep: () => prep(100, generateString(1)),
+  prep: () => prep(100000, generateString(1)),
   benchmark: () => benchmarkReadSerialGet(),
+}
+
+const read1000x52KB: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbRead100x52KB',
+  label: 'idb read 1000x52KB',
+  prep: () => prep(1000, generateString(52)),
+  benchmark: () => benchmarkReadParallelGet(1000),
 }
 
 const cursorBaseCase = {
@@ -319,6 +354,7 @@ export const idbReadTestCases = [
   read100x1KBGetAll,
   read100x1KBParallelGet,
   read100x1KBSerialGet,
+  read1000x52KB,
   read1024x100BCursor,
   read100x1KBCursor,
   readJSON,

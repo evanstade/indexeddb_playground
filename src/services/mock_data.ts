@@ -1,5 +1,9 @@
 export function generateString(sizeInKb: number) {
-  return new Array(Math.floor((sizeInKb * 1024) / 4 + 1)).join('abcd');
+  let output = '';
+  for (let i = 0; i < sizeInKb * 1024 / 8 + 1; i++) {
+    output += Math.random().toString(36).slice(2, 10);
+  }
+  return output;
 }
 
 export const fakeGithubResponse = [
