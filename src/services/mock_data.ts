@@ -1,4 +1,10 @@
+// Generates a very repetitive string of the given length.
 export function generateString(sizeInKb: number) {
+  return new Array(Math.floor((sizeInKb * 1024) / 4 + 1)).join('abcd');
+}
+
+// Generates a pseudorandom string of the given length.
+export function generateRandomString(sizeInKb: number) {
   let output = '';
   for (let i = 0; i < sizeInKb * 1024 / 8 + 1; i++) {
     output += Math.random().toString(36).slice(2, 10);

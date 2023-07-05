@@ -4,6 +4,7 @@ import {PerformanceTestCase} from 'services/performance/performance';
 
 const CONTEXT = 'idb_read';
 
+// Fills the `entries` object store with multiple records with different (and randomized) values.
 function prepDifferentStrings(iteration: number, strLen : number) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
@@ -22,7 +23,7 @@ function prepDifferentStrings(iteration: number, strLen : number) {
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
       for (let i = 0; i < iteration; ++i) {
-        store.add({key: `doc_${i}`, value: generateString(strLen)});
+        store.add({key: `doc_${i}`, value: generateRandomString(strLen)});
       }
       transaction.onerror = () => {
         handleError(transaction.error!, CONTEXT, reject);
@@ -35,6 +36,7 @@ function prepDifferentStrings(iteration: number, strLen : number) {
   });
 }
 
+// Fills the `entries` object store with records with the same value.
 function prep(iteration: number, blob: string|object) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
@@ -153,6 +155,7 @@ function benchmarkReadGetAll() {
   });
 }
 
+// Reads a certain number of values in a randomized order.
 function benchmarkReadParallelGet(fetchCount : number) {
   return new Promise<number>((resolve, reject) => {
     const results: Record<string, {}> = {};
@@ -307,7 +310,15 @@ const read100x1KBGetAll: PerformanceTestCase = {
 const read100x1KBParallelGet: PerformanceTestCase = {
   ...baseCase,
   name: 'idbRead100x1KBParallelGet',
-  label: 'idb read 100x1KB by sending get requests in parallel',
+  label: 'idb read 100x1KB by sending get requests in parallel. Values are repetitive. Database size is tiny.',
+  prep: () => prep(100, generateString(1)),
+  benchmark: () => benchmarkReadParallelGet(100),
+}
+
+const readFromLargeDatabase: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbRead100x1KBParallelGet',
+  label: 'idb read 100x1KB by sending get requests in parallel. Values are randomized. Database size is large.',
   prep: () => prepDifferentStrings(500000, 1),
   benchmark: () => benchmarkReadParallelGet(100),
 }
@@ -358,4 +369,5 @@ export const idbReadTestCases = [
   read1024x100BCursor,
   read100x1KBCursor,
   readJSON,
+  readFromLargeDatabase,
 ];

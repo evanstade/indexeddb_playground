@@ -1,11 +1,11 @@
 import {ci, median, mean} from '../stats';
-import {localStorageWriteTestCases} from './local_storage_write';
-import {localStorageReadTestCases} from './local_storage_read';
+//import {localStorageWriteTestCases} from './local_storage_write';
+//import {localStorageReadTestCases} from './local_storage_read';
 import {idbWriteTestCases} from './idb_write';
 import {idbReadTestCases} from './idb_read';
 import {idbRangeReadTestCases} from './idb_range_read';
-import {cacheWriteTestCases} from './cache_write';
-import {cacheReadTestCases} from './cache_read';
+//import {cacheWriteTestCases} from './cache_write';
+//import {cacheReadTestCases} from './cache_read';
 import {idbOpenTestCases} from './idb_open';
 import {nextFrame} from 'services/next_frame';
 
