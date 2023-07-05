@@ -323,6 +323,22 @@ const readFromLargeDatabase: PerformanceTestCase = {
   benchmark: () => benchmarkReadParallelGet(100),
 }
 
+const readRepetitiveFromLargeDatabase: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbReadRepetitiveFromLargeDatabase',
+  label: 'idb read 100x1KB by sending get requests in parallel. Values are repetitive. Database size is large.',
+  prep: () => prep(100000, generateString(1)),
+  benchmark: () => benchmarkReadParallelGet(100),
+}
+
+const readLargeRepetitiveFromMediumDatabase: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbReadLargeRepetitiveFromMediumDatabase',
+  label: 'idb read 100x150KB by sending get requests in parallel. Values are repetitive. Database size is medium.',
+  prep: () => prep(10000, generateString(150)),
+  benchmark: () => benchmarkReadParallelGet(100),
+}
+
 const read100x1KBSerialGet: PerformanceTestCase = {
   ...baseCase,
   name: 'idbRead100x1KBSerialGet',
@@ -370,4 +386,6 @@ export const idbReadTestCases = [
   read100x1KBCursor,
   readJSON,
   readFromLargeDatabase,
+  readRepetitiveFromLargeDatabase,
+  readLargeRepetitiveFromMediumDatabase,
 ];
