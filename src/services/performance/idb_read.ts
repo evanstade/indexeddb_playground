@@ -317,9 +317,9 @@ const read100x1KBParallelGet: PerformanceTestCase = {
 
 const readFromLargeDatabase: PerformanceTestCase = {
   ...baseCase,
-  name: 'idbRead100x1KBParallelGet',
+  name: 'idbReadFromLargeDatabase',
   label: 'idb read 100x1KB by sending get requests in parallel. Values are randomized. Database size is large.',
-  prep: () => prepDifferentStrings(500000, 1),
+  prep: () => prepDifferentStrings(100000, 1),
   benchmark: () => benchmarkReadParallelGet(100),
 }
 
