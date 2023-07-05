@@ -67,11 +67,13 @@ export async function runTest(
   });
 }
 
-addTestCases(localStorageWriteTestCases);
-addTestCases(localStorageReadTestCases);
 addTestCases(idbWriteTestCases);
 addTestCases(idbReadTestCases);
 addTestCases(idbRangeReadTestCases);
 addTestCases(idbOpenTestCases);
+/*
+addTestCases(localStorageWriteTestCases);
+addTestCases(localStorageReadTestCases);
 addTestCases(cacheWriteTestCases);
 addTestCases(cacheReadTestCases);
+*/

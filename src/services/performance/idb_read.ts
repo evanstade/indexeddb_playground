@@ -1,5 +1,5 @@
 import {handleError} from 'services/error';
-import {fakeGithubResponse, generateString} from 'services/mock_data';
+import {fakeGithubResponse, generateString, generateRandomString} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
 
 const CONTEXT = 'idb_read';
