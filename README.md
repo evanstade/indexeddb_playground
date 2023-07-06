@@ -18,4 +18,4 @@ $ npm run build
 $ npx http-server build/
 ```
 
-(This is how an npm newb bludgeoned it into working; improvements welcome.)
+(This is how a node newb bludgeoned it into working; improvements welcome.)
