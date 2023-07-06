@@ -2,6 +2,8 @@
 
 Forked from <https://idb.zeroliu.com>
 
+The goal is to test IndexedDB performance under various scenarios that the original benchmarks didn't touch on, e.g. reading with or without a lot of records, with or without compressible data, etc.
+
 ## How to use
 
 First time setup:
