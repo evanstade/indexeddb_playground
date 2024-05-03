@@ -1,5 +1,5 @@
 import {ci, median, mean} from '../stats';
-//import {localStorageWriteTestCases} from './local_storage_write';
+import {localStorageWriteTestCases} from './local_storage_write';
 //import {localStorageReadTestCases} from './local_storage_read';
 import {idbWriteTestCases} from './idb_write';
 import {idbReadTestCases} from './idb_read';
@@ -67,12 +67,12 @@ export async function runTest(
   });
 }
 
+addTestCases(localStorageWriteTestCases);
 addTestCases(idbWriteTestCases);
 addTestCases(idbReadTestCases);
 addTestCases(idbRangeReadTestCases);
 addTestCases(idbOpenTestCases);
 /*
-addTestCases(localStorageWriteTestCases);
 addTestCases(localStorageReadTestCases);
 addTestCases(cacheWriteTestCases);
 addTestCases(cacheReadTestCases);

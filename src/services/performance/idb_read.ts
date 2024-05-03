@@ -334,8 +334,8 @@ const readRepetitiveFromLargeDatabase: PerformanceTestCase = {
 const readLargeRepetitiveFromMediumDatabase: PerformanceTestCase = {
   ...baseCase,
   name: 'idbReadLargeRepetitiveFromMediumDatabase',
-  label: 'idb read 100x150KB by sending get requests in parallel. Values are repetitive. Database size is medium.',
-  prep: () => prep(10000, generateString(150)),
+  label: 'idb read 100x50KB by sending get requests in parallel. Values are repetitive. Database size is medium.',
+  prep: () => prep(10000, generateString(50)),
   benchmark: () => benchmarkReadParallelGet(100),
 }
 

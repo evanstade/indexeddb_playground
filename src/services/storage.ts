@@ -6,6 +6,7 @@ export interface EstimateResult {
   estimate: StorageEstimate;
 }
 
+/*
 const estimateIdbStorage: EstimateFunc = async () => {
   if ('storage' in navigator && 'estimate' in navigator.storage) {
     return {
@@ -15,6 +16,7 @@ const estimateIdbStorage: EstimateFunc = async () => {
   }
   return null;
 };
+*/
 
 interface KaiOSDeviceStorage {
   freeSpace: () => any;
@@ -56,7 +58,7 @@ const estimateLocalStorage: EstimateFunc = async () => {
 };
 
 export const estimateFuncs = [
-  estimateIdbStorage,
+ // estimateIdbStorage,
   estimateKaiosStorage,
   estimateLocalStorage,
 ];

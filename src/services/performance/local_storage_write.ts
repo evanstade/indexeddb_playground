@@ -1,4 +1,4 @@
-import {generateString, fakeGithubResponse} from 'services/mock_data';
+import {generateString, generateRandomString, fakeGithubResponse} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
 
 function benchmarkWrite(
@@ -16,6 +16,25 @@ function benchmarkWrite(
   localStorage.clear();
   return Promise.resolve(end - start);
 }
+
+function benchmarkWriteRandom(
+  iteration: number,
+  byteseach: number,
+  isJSON = false
+) {
+  let values = [];
+  for (let i = 0; i < iteration; ++i) {
+    values.push(generateRandomString(byteseach));
+  }
+
+  const start = performance.now();
+  for (let i = 0; i < iteration; ++i) {
+    localStorage.setItem(`doc_${i}`, values[i]);
+  }
+  const end = performance.now();
+  return Promise.resolve(end - start);
+}
+
 
 const baseCase = {
   iteration: 100,
@@ -44,9 +63,9 @@ const writeJSON: PerformanceTestCase = {
 
 const write1024x100B: PerformanceTestCase = {
   ...baseCase,
-  name: 'localStorageWrite1024x100B',
-  label: 'localStorage write 1024x100B',
-  benchmark: () => benchmarkWrite(1024, generateString(100 / 1024)),
+  name: 'localStorageWrite1024x10KB',
+  label: 'localStorage write a bunch of random data',
+  benchmark: () => benchmarkWriteRandom(102, 10),
 };
 
 const write100x1KB: PerformanceTestCase = {
