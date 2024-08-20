@@ -91,6 +91,50 @@ function benchmarkWrite(iteration: number, blob: string|object) {
   });
 }
 
+function benchmarkWriteBlob(iteration: number, blob: string|object) {
+  return new Promise<number>((resolve, reject) => {
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+    request.onerror = () => {
+      handleError(request.error!, CONTEXT, reject);
+    };
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      db.createObjectStore('entries', {
+        keyPath: 'key',
+      });
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const start = performance.now();
+      const transaction = db.transaction('entries', 'readwrite');
+      const store = transaction.objectStore('entries');
+      for (let i = 0; i < iteration; ++i) {
+        store.add({key: `doc_${i}`, new Blob(blob, {type: 'text/plain'}}));
+      }
+      transaction.onerror = () => {
+        handleError(transaction.error!, CONTEXT, reject);
+      };
+      transaction.oncomplete = () => {
+        const end = performance.now();
+        db.close();
+/*
+        const deletionRequest =
+            indexedDB.deleteDatabase('idb-playground-benchmark');
+        deletionRequest.onerror = () => {
+          handleError(deletionRequest.error!, CONTEXT, reject);
+        };
+*/
+        deletionRequest.onsuccess = () => {
+          resolve(end - start);
+        };
+      };
+    };
+  });
+}
+
+
+
 function benchmarkWriteWithContention(contentionCount: number) {
   return new Promise<number>((resolve, reject) => {
     let completed = 0;
@@ -294,6 +338,12 @@ const write1MB: PerformanceTestCase = {
   name: 'idbWrite1MB',
   label: 'idb write 1MB',
   benchmark: () => benchmarkWrite(1, generateString(1024)),
+};
+const write1MB: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbWrite1MBBlob',
+  label: 'idb write 1MB Blob',
+  benchmark: () => benchmarkWriteBlob(1, generateString(1024)),
 };
 const write1MBx100: PerformanceTestCase = {
   ...baseCase,
