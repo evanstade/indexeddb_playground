@@ -91,7 +91,8 @@ function benchmarkWrite(iteration: number, blob: string|object) {
   });
 }
 
-function benchmarkWriteBlob(iteration: number, blob: string|object) {
+function benchmarkWriteBlob(iteration: number, blob: string) {
+  let blurb = new Blob([blob], {type: 'text/plain'});
   return new Promise<number>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
@@ -110,22 +111,25 @@ function benchmarkWriteBlob(iteration: number, blob: string|object) {
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
       for (let i = 0; i < iteration; ++i) {
-        store.add({key: `doc_${i}`, new Blob(blob, {type: 'text/plain'}}));
+        store.add({key: `doc_${i}`, blurb});
       }
       transaction.onerror = () => {
         handleError(transaction.error!, CONTEXT, reject);
       };
       transaction.oncomplete = () => {
+        navigator.storage.estimate().then((estimate) => {
+          console.log(estimate);
+        });
+
         const end = performance.now();
         db.close();
-/*
         const deletionRequest =
             indexedDB.deleteDatabase('idb-playground-benchmark');
         deletionRequest.onerror = () => {
           handleError(deletionRequest.error!, CONTEXT, reject);
         };
-*/
         deletionRequest.onsuccess = () => {
+          // Comment out the next line if you want the blob to survive the test. (The test won't complete.)
           resolve(end - start);
         };
       };
@@ -339,10 +343,10 @@ const write1MB: PerformanceTestCase = {
   label: 'idb write 1MB',
   benchmark: () => benchmarkWrite(1, generateString(1024)),
 };
-const write1MB: PerformanceTestCase = {
+const write1MBBlob: PerformanceTestCase = {
   ...baseCase,
   name: 'idbWrite1MBBlob',
-  label: 'idb write 1MB Blob',
+  label: 'idb write 1MB-Blob',
   benchmark: () => benchmarkWriteBlob(1, generateString(1024)),
 };
 const write1MBx100: PerformanceTestCase = {
@@ -404,6 +408,7 @@ export const idbWriteTestCases = [
   write1MBx100WithContention100x10KB,
   write1MBx100WithContention1000x10KB,
   write1MB,
+  write1MBBlob,
   write1KB,
   write1024x100B,
   write100x1KB,
