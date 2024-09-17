@@ -35,7 +35,7 @@ export class LocalStorageAbuser extends BaseAbuser {
       }
       benchmarkAdd.end();
       return Promise.resolve();
-    } catch (e) {
+    } catch (e: any) {
       handleError(e, this.name);
       return Promise.reject(e);
     }

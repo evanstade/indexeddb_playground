@@ -301,7 +301,7 @@ function benchmarkLongTransactionWrite(iteration: number, blob: string|object) {
             await store.add({key: `doc_${i}`, blob});
           }
         });
-      } catch (e) {
+      } catch (e: any) {
         handleError(e, CONTEXT, reject);
       }
       const end = performance.now();
