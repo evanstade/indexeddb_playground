@@ -25,7 +25,7 @@ function prep() {
       for (let i = 0; i < 200; ++i) {
         store.add({
           key: `doc_${i}`,
-          blob: generateString(100 / 1024),
+          blob: new Blob([generateString(100 / 1024)], { type: 'text/plain' }),
           index: i,
         });
       }
@@ -59,7 +59,7 @@ async function getByKey(db: IDBDatabase, key: string) {
       .objectStore('entries')
       .get(key);
     request.onsuccess = () => {
-      resolve(request.result);
+      resolve(request.result.blob.text());
     };
     request.onerror = () => {
       handleError(request.error!, CONTEXT, reject);
@@ -100,7 +100,7 @@ function benchmarkReadCursor() {
       storeRequest.onsuccess = () => {
         const cursor = storeRequest.result;
         if (cursor && cursor.value.index < 100) {
-          results[cursor.key as string] = cursor.value;
+          results[cursor.key as string] = cursor.value.blob.text();
           cursor.continue();
         } else {
           const end = performance.now();
@@ -130,8 +130,8 @@ function benchmarkReadKeyRange() {
       const getAllRequest = index.getAll(keyRange);
       getAllRequest.onsuccess = () => {
         const items = getAllRequest.result;
-        items.forEach((item: {key: string; blob: string}) => {
-          results[item.key] = item;
+        items.forEach((item: {key: string; blob: Blob}) => {
+          results[item.key] = item.blob.text();
         });
         const end = performance.now();
         db.close();
@@ -139,10 +139,10 @@ function benchmarkReadKeyRange() {
       };
       getAllRequest.onerror = () => {
         handleError(getAllRequest.error!, CONTEXT, reject);
+        const end = performance.now();
+        db.close();
+        resolve(end - start);
       };
-      const end = performance.now();
-      db.close();
-      resolve(end - start);
     };
   });
 }
@@ -157,21 +157,21 @@ const baseCase = {
 const rangeReadSingleGet: PerformanceTestCase = {
   ...baseCase,
   name: 'idbRangeReadSingleGet',
-  label: 'idb read 100x100B blob by getting each item in its own transaction',
+  label: 'idb read 100x100B Blob by getting each item in its own transaction',
   benchmark: () => benchmarkReadSingleGet(),
 };
 
 const rangeReadKeyRange: PerformanceTestCase = {
   ...baseCase,
   name: 'idbRangeReadRange',
-  label: 'idb read 100x100B blob with key range.',
+  label: 'idb read 100x100B Blob with key range.',
   benchmark: () => benchmarkReadKeyRange(),
 };
 
 const rangeReadCursor: PerformanceTestCase = {
   ...baseCase,
   name: 'idbRangeReadCursor',
-  label: 'idb read 100x100B blob with cursor.',
+  label: 'idb read 100x100B Blob with cursor.',
   benchmark: () => benchmarkReadCursor(),
 };
 
