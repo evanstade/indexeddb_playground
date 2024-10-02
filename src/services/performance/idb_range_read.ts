@@ -59,7 +59,7 @@ async function getByKey(db: IDBDatabase, key: string) {
       .objectStore('entries')
       .get(key);
     request.onsuccess = () => {
-      resolve(request.result.blob.text());
+      request.result.blob.text().then((value:string) => resolve(value));
     };
     request.onerror = () => {
       handleError(request.error!, CONTEXT, reject);
@@ -97,12 +97,13 @@ function benchmarkReadCursor() {
       const transaction = db.transaction('entries', 'readonly');
       const store = transaction.objectStore('entries');
       const storeRequest = store.openCursor();
-      storeRequest.onsuccess = () => {
+      storeRequest.onsuccess = async () => {
         const cursor = storeRequest.result;
-        if (cursor && cursor.value.index < 100) {
+        if (cursor) {
           results[cursor.key as string] = cursor.value.blob.text();
           cursor.continue();
         } else {
+          await Promise.all(Object.values(results));
           const end = performance.now();
           db.close();
           resolve(end - start);
@@ -128,11 +129,12 @@ function benchmarkReadKeyRange() {
       const store = transaction.objectStore('entries');
       const index = store.index('index');
       const getAllRequest = index.getAll(keyRange);
-      getAllRequest.onsuccess = () => {
+      getAllRequest.onsuccess = async () => {
         const items = getAllRequest.result;
         items.forEach((item: {key: string; blob: Blob}) => {
           results[item.key] = item.blob.text();
         });
+        await Promise.all(Object.values(results));
         const end = performance.now();
         db.close();
         resolve(end - start);
