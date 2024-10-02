@@ -15,9 +15,7 @@ $ npm install --save-dev react-dev-utils
 Compile and run:
 
 ```
-$ export NODE_OPTIONS=--openssl-legacy-provider
-$ npm run build
-$ npx http-server build/
+$ npm run start
 ```
 
-(This is how a node newb bludgeoned it into working; improvements welcome.)
+Then visit `http://127.0.0.1:3000` in a web browser.

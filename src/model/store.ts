@@ -1,9 +1,10 @@
 import {
-  createStore as reduxCreateStore,
   compose as reduxCompose,
   Store,
   combineReducers,
 } from 'redux';
+import { configureStore } from '@reduxjs/toolkit'
+
 import {logsReducer} from './logs/logs_reducers';
 
 /** Window interface with redux devtools compose function. */
@@ -25,17 +26,7 @@ const rootReducer = combineReducers({
 export type AppState = ReturnType<typeof rootReducer>;
 
 export function createStore() {
-  let compose = reduxCompose;
-  if (
-    isReduxExtensionInstalled(window) &&
-    process.env.NODE_ENV === 'development'
-  ) {
-    compose = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
-  }
-  store = reduxCreateStore<AppState, any, unknown, unknown>(
-    rootReducer,
-    compose()
-  );
+  store = configureStore({reducer: rootReducer});
   return store;
 }
 

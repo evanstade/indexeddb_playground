@@ -30,7 +30,7 @@ class CustomIdbTransaction {
       private readonly callback: (tx: CustomIdbTransaction) => Promise<void>) {}
 
   commit() {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let currentTask: WorkQueueItem|undefined;
       let request: IDBRequest;
       const keepAlive = () => {
@@ -65,7 +65,7 @@ class CustomIdbTransaction {
           .then(() => {
             this.resolved = true;
             console.log(`Internal get() count: ${this.debugCount}`);
-            this.wrapped.oncomplete = () => {
+            this.wrapped.oncomplete = () =>  {
               resolve();
             };
             this.wrapped.onerror = (err) => {

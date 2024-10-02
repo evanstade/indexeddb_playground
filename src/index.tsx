@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import {App} from './components/app/App';
 import * as serviceWorker from './serviceWorker';
 import {Provider} from 'react-redux';
-import {createStore} from 'model/store';
-import {log} from 'services/logger';
+import {createStore} from './model/store';
+import {log} from './services/logger';
 
 const appWrapperId = 'idb-app-wrapper';
 let wrapper = document.getElementById(appWrapperId) as HTMLElement;
