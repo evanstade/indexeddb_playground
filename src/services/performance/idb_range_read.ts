@@ -25,7 +25,7 @@ function prep() {
       for (let i = 0; i < 200; ++i) {
         store.add({
           key: `doc_${i}`,
-          blob: new Blob([generateString(100 / 1024)], { type: 'text/plain' }),
+          blob: new Blob([generateString(1024)], { type: 'text/plain' }),
           index: i,
         });
       }
