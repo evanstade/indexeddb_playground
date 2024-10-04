@@ -1,0 +1,25 @@
+{
+  "name": "idb_playground",
+  "display": "IndexedDB Playground",
+  "description": "Tools to test indexedDB features.",
+  "launch_path": "/index.html",
+  "icons": {
+    "512": "/logo512.png",
+    "128": "/logo128.png"
+  },
+  "developer": {
+    "name": "Zero Liu",
+    "url": "http://idb.zeroliu.com"
+  },
+  "default_locale": "en",
+  "type": "certified",
+  "permissions": {
+    "device-storage:videos": {
+      "access": "readonly"
+    },
+    "device-storage:apps":{ "access": "readonly" },
+    "webapps-manage":{ }
+  },
+  "cursor": true,
+  "version": "0.01"
+}
