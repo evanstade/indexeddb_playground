@@ -1,5 +1,5 @@
 import {handleError} from 'services/error';
-import {fakeGithubResponse, generateString, generateRandomString} from 'services/mock_data';
+import {pythonFile, binaryFile, fakeGithubResponse, generateString, generateRandomString} from 'services/mock_data';
 import {PerformanceTestCase, getCustomTestData} from 'services/performance/performance';
 
 const CONTEXT = 'idb_read';
@@ -270,15 +270,30 @@ const readJSON: PerformanceTestCase = {
   name: 'idbReadJSON',
   label: 'idb read 70KB JSON',
   prep: () => prep(10, fakeGithubResponse),
+};
+
+const readHugePython: PerformanceTestCase = {
+  ...baseCase,
+  benchmark: () => benchmarkReadGetOne(),
+  name: 'idbReadHugePython',
+  label: 'idb read 300kB Python',
+  prep: () => prep(10, pythonFile),
 }
 
+const readHugerBinary: PerformanceTestCase = {
+  ...baseCase,
+  benchmark: () => benchmarkReadGetOne(),
+  name: 'idbReadHugerBinary',
+  label: 'idb read ~30MB binary',
+  prep: () => prep(10, binaryFile),
+}
 const readCustomData: PerformanceTestCase = {
   ...baseCase,
   benchmark: () => benchmarkReadGetOne(),
   name: 'idbReadCustomData',
   label: 'idb read custom data',
   prep: () => prep(10, getCustomTestData()),
-};;
+};
 
 const read1MB: PerformanceTestCase = {
   ...baseCase,
@@ -393,6 +408,8 @@ export const idbReadTestCases = [
   read1024x100BCursor,
   read100x1KBCursor,
   readJSON,
+  readHugePython,
+  readHugerBinary,
   readCustomData,
   readFromLargeDatabase,
   readRepetitiveFromLargeDatabase,
