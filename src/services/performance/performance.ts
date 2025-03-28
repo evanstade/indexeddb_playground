@@ -24,6 +24,12 @@ interface PerformanceReport {
   mean: number;
 }
 
+let customTestData: ArrayBuffer| null = null;
+
+export function getCustomTestData() {
+  return customTestData as ArrayBuffer;
+}
+
 let testCases: Record<string, PerformanceTestCase> = {};
 
 function addTestCases(inputs: PerformanceTestCase[]) {
@@ -65,6 +71,15 @@ export async function runTest(
       mean: mean(results),
     });
   });
+}
+
+export function setCustomTestData(file: File) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    customTestData = e.target?.result as ArrayBuffer;
+    console.log("Custom test data loaded of size: ", customTestData?.byteLength);
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 addTestCases(localStorageWriteTestCases);

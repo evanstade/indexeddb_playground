@@ -1,6 +1,6 @@
 import {handleError} from 'services/error';
 import {fakeGithubResponse, generateString, generateRandomString} from 'services/mock_data';
-import {PerformanceTestCase} from 'services/performance/performance';
+import {PerformanceTestCase, getCustomTestData} from 'services/performance/performance';
 
 const CONTEXT = 'idb_read';
 
@@ -37,7 +37,7 @@ function prepDifferentStrings(iteration: number, strLen : number) {
 }
 
 // Fills the `entries` object store with records with the same value.
-function prep(iteration: number, blob: string|object) {
+function prep(iteration: number, blob: string|object|ArrayBuffer) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
@@ -270,7 +270,15 @@ const readJSON: PerformanceTestCase = {
   name: 'idbReadJSON',
   label: 'idb read 70KB JSON',
   prep: () => prep(10, fakeGithubResponse),
-};
+}
+
+const readCustomData: PerformanceTestCase = {
+  ...baseCase,
+  benchmark: () => benchmarkReadGetOne(),
+  name: 'idbReadCustomData',
+  label: 'idb read custom data',
+  prep: () => prep(10, getCustomTestData()),
+};;
 
 const read1MB: PerformanceTestCase = {
   ...baseCase,
@@ -385,6 +393,7 @@ export const idbReadTestCases = [
   read1024x100BCursor,
   read100x1KBCursor,
   readJSON,
+  readCustomData,
   readFromLargeDatabase,
   readRepetitiveFromLargeDatabase,
   readLargeRepetitiveFromMediumDatabase,

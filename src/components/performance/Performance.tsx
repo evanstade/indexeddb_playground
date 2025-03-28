@@ -4,6 +4,7 @@ import {FreeSpaceLogger} from 'components/free_space_logger/FreeSpaceLogger';
 import {
   getAllTestCases,
   getTestCase,
+  setCustomTestData,
   runTest,
   PerformanceTestCase,
 } from 'services/performance/performance';
@@ -49,6 +50,10 @@ export function Performance() {
     runTestCase(selectedTestCase);
   }
 
+  async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    setCustomTestData(e.target.files![0]);
+  }
+
   return (
     <div className="performance">
       <FreeSpaceLogger />
@@ -78,6 +83,9 @@ export function Performance() {
         <div
           style={{backgroundImage: `url('kirby.gif')`}}
           className="performance-gif"></div>
+        <input type="file"
+          disabled={isRunning}
+          onChange={handleFileSelected}/>
       </div>
     </div>
   );
