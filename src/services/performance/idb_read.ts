@@ -1,6 +1,6 @@
 import {handleError} from 'services/error';
-import {fakeGithubResponse, generateString, generateRandomString} from 'services/mock_data';
-import {PerformanceTestCase} from 'services/performance/performance';
+import {pythonFile, binaryFile, fakeGithubResponse, generateString, generateRandomString} from 'services/mock_data';
+import {PerformanceTestCase, getCustomTestData} from 'services/performance/performance';
 
 const CONTEXT = 'idb_read';
 
@@ -37,7 +37,7 @@ function prepDifferentStrings(iteration: number, strLen : number) {
 }
 
 // Fills the `entries` object store with records with the same value.
-function prep(iteration: number, blob: string|object) {
+function prep(iteration: number, blob: string|object|ArrayBuffer) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
@@ -55,7 +55,7 @@ function prep(iteration: number, blob: string|object) {
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
       for (let i = 0; i < iteration; ++i) {
-        store.add({key: `doc_${i}`, blob});
+        store.put({ key: `doc_${i}`, blob });
       }
       transaction.onerror = () => {
         handleError(transaction.error!, CONTEXT, reject);
@@ -90,18 +90,24 @@ function benchmarkReadGetOne() {
       const start = performance.now();
       const transaction = db.transaction('entries', 'readonly');
       const store = transaction.objectStore('entries');
-      const getRequest = store.get('doc_1');
+      const getRequest = store.get('doc_0');
       getRequest.onsuccess = () => {
-        results['doc_1'] = getRequest.result;
+        if (getRequest.result.blob) {
+          getRequest.result.blob.arrayBuffer().then((arrayBuffer: ArrayBuffer) => {
+            results['doc_0'] = arrayBuffer;
+            resolve(performance.now() - start);
+          }, (error: any) => { console.log(error); });
+        } else {
+          results['doc_0'] = getRequest.result;
+          resolve(performance.now() - start);
+        }
       };
       getRequest.onerror = () => {
         handleError(getRequest.error!, CONTEXT, reject);
       };
       transaction.oncomplete = () => {
-        const end = performance.now();
         db.close();
-        resolve(end - start);
-      }
+      };
     };
   });
 }
@@ -269,7 +275,39 @@ const readJSON: PerformanceTestCase = {
   benchmark: () => benchmarkReadGetOne(),
   name: 'idbReadJSON',
   label: 'idb read 70KB JSON',
-  prep: () => prep(10, fakeGithubResponse),
+  prep: () => prep(1, fakeGithubResponse),
+};
+
+const readHugePython: PerformanceTestCase = {
+  ...baseCase,
+  benchmark: () => benchmarkReadGetOne(),
+  name: 'idbReadHugePython',
+  label: 'idb read 300kB Python',
+  prep: () => prep(1, pythonFile),
+}
+
+const readHugerBinary: PerformanceTestCase = {
+  ...baseCase,
+  benchmark: () => benchmarkReadGetOne(),
+  name: 'idbReadHugerBinary',
+  label: 'idb read ~30MB binary',
+  prep: () => prep(1, binaryFile),
+}
+
+const readHugeBinaryBlob: PerformanceTestCase = {
+  ...baseCase,
+  benchmark: () => benchmarkReadGetOne(),
+  name: 'idbReadHugeBinaryBlob',
+  label: 'idb read ~30MB binary, but it\'s a Blob',
+  prep: () => prep(1, new Blob([binaryFile], { type: 'text/plain' })),
+}
+
+const readCustomData: PerformanceTestCase = {
+  ...baseCase,
+  benchmark: () => benchmarkReadGetOne(),
+  name: 'idbReadCustomData',
+  label: 'idb read custom data',
+  prep: () => prep(10, getCustomTestData()),
 };
 
 const read1MB: PerformanceTestCase = {
@@ -385,6 +423,10 @@ export const idbReadTestCases = [
   read1024x100BCursor,
   read100x1KBCursor,
   readJSON,
+  readHugePython,
+  readHugerBinary,
+  readHugeBinaryBlob,
+  readCustomData,
   readFromLargeDatabase,
   readRepetitiveFromLargeDatabase,
   readLargeRepetitiveFromMediumDatabase,
