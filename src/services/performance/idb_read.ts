@@ -23,7 +23,7 @@ function prepDifferentStrings(iteration: number, strLen : number) {
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
       for (let i = 0; i < iteration; ++i) {
-        store.add({key: `doc_${i}`, value: generateRandomString(strLen)});
+        store.put({key: `doc_${i}`, value: generateRandomString(strLen)});
       }
       transaction.onerror = () => {
         handleError(transaction.error!, CONTEXT, reject);
@@ -299,7 +299,7 @@ const readHugeBinaryBlob: PerformanceTestCase = {
   benchmark: () => benchmarkReadGetOne(),
   name: 'idbReadHugeBinaryBlob',
   label: 'idb read ~30MB binary, but it\'s a Blob',
-  prep: () => prep(1, new Blob([binaryFile], { type: 'text/plain' })),
+  prep: () => prep(10, new Blob([binaryFile], { type: 'text/plain' })),
 }
 
 const readCustomData: PerformanceTestCase = {
@@ -343,6 +343,13 @@ const read100x1KBGetAll: PerformanceTestCase = {
   name: 'idbRead100x1KBGetAll',
   label: 'idb read 100x1KB with getAll',
   prep: () => prep(100, generateString(1)),
+};
+
+const read10000x70KBGetAll: PerformanceTestCase = {
+  ...getAllBaseCase,
+  name: 'idbRead10000x70KBGetAll',
+  label: 'idb read 10000x70KB with getAll (massive shared memory usage)',
+  prep: () => prep(10000, generateString(70)),
 };
 
 const read100x1KBParallelGet: PerformanceTestCase = {
@@ -417,6 +424,7 @@ export const idbReadTestCases = [
   read1KB,
   read1024x100BGetAll,
   read100x1KBGetAll,
+  read10000x70KBGetAll,
   read100x1KBParallelGet,
   read100x1KBSerialGet,
   read1000x52KB,
